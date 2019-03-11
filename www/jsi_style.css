@@ -77,4 +77,6 @@ img.spinimg:hover {
     display:none;
 }
 
-
+pre {
+   line-height:140%;
+}
