@@ -4,7 +4,7 @@ body {
 div.content {
     font-family:Palatino,Georgia,"Times New Roman",serif;
     font-size:90%;
-    /*color:#222; */
+    color:#222;
     line-height:140%;
     -webkit-font-smoothing: antialiased;
 }
@@ -45,10 +45,14 @@ img.spinimg:hover {
 
 #sectmenu {
     float: right;
+    /*padding-top:0px;
+     position: fixed;
+    right:1px;*/
+  
+    /*clear:both; top:0px;  */
     margin: 1em 0;
     padding: 4px;
-    /*background: #f0f0fa; */
-    background: #0a0a19;
+    background: #f0f0fa;
     border: 2px solid #E0D8B7;
     border-radius: 1em;
     font-size: 11px;
@@ -75,4 +79,15 @@ img.spinimg:hover {
 
 pre {
    line-height:140%;
+}
+
+/* Dark style overrides */
+#sectmenu {
+    background: #0a0a19;
+}
+div.content {
+    color:#ddd;
+}
+body {
+  margin:0 auto;
 }
