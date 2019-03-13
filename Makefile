@@ -1,11 +1,10 @@
-# Makefile to download/compile libwebsockets.a, with or without CMAKE.
-#LWSVER=1.7
+# Makefile to create lws.c and lwsOne.c
+# TODO: create lws.h, add miniz.c
 LWSVER=2.2
 
 TARGET=unix
 LWSBASE=src
 CFLAGS  = -g -Wall -I$(SOURCEDIR) -I$(TARGET)/
-#-fsanitize=address
 
 ifeq ($(MINIZ),1)
 CFLAGS += -I../miniz
@@ -31,10 +30,6 @@ SOURCES = $(SOURCEDIR)/base64-decode.c $(SOURCEDIR)/handshake.c $(SOURCEDIR)/lib
 ifeq ($(LWSSSL),1)
 SSLSOURCES += $(SOURCEDIR)/ssl.c $(SOURCEDIR)/ssl-client.c $(SOURCEDIR)/ssl-server.c $(SOURCEDIR)/ssl-http2.c
 endif
-
-
-#alloc.c.o          client.c.o            client-parser.c.o  handshake.c.o  libwebsockets.c.o  output.c.o   pollfd.c.o  server.c.o            service.c.o
-#base64-decode.c.o  client-handshake.c.o  context.c.o        header.c.o     lws-plat-unix.c.o  parsers.c.o  ranges.c.o  server-handshake.c.o  sha-1.c.o
 
 
 WFILES = $(SOURCEDIR)/lws-plat-win.c 
@@ -76,8 +71,6 @@ mkdirs:
 checkver:
 	rm -f src && ln -sf libwebsockets-$(LWSVER) src
 
-download: $(SOURCEDIR)/base64-decode.c
-
 # Create the single amalgamation file lws.c
 lws.c: $(SOURCEDIR)/libwebsockets.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	cat $(SOURCEDIR)/libwebsockets.h > $@
@@ -111,13 +104,6 @@ lwsOne.c: $(SOURCEDIR)/libwebsockets.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	echo "#endif //WIN32" >> $@
 
 
-$(SOURCEDIR)/base64-decode.c:
-	wget http://jsish.org/download/libwebsockets-$(LWSVER).zip
-	unzip libwebsockets-$(LWSVER).zip
-	ln -sf libwebsockets-$(LWSVER) src
-	rm libwebsockets-$(LWSVER).zip
-	$(MAKE)
-
 ifeq ($(DOCMAKE),1)
 $(BUILDDIR)/libwebsockets.a:
 	( mkdir -p $(BUILDDIR) && cd $(BUILDDIR) && CC=$(CC) AR=$(AR) $(CMAKE) ../../$(LWSBASE) $(LWSFLAGS)   && $(MAKE) CC=$(CC) AR=$(AR) && cp lib/$(LWSLIBBUILD) libwebsockets.a)
@@ -137,4 +123,4 @@ clean:
 cleanall: clean
 	rm -rf build
 	
-.PHONY: all depend remake clean cleanall download
+.PHONY: all depend remake clean cleanall
