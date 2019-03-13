@@ -94,6 +94,6 @@ body {
 textarea {
   height:300px;
 }
-div.forumSel {
+input, div.forumSel {
    background:gray;
 }
