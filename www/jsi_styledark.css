@@ -94,6 +94,6 @@ body {
 textarea {
   height:300px;
 }
-.forumSel {
+div.forumSel {
    background:gray;
 }
