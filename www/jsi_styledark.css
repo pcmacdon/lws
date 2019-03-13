@@ -91,3 +91,6 @@ div.content {
 body {
   margin:0 auto;
 }
+textarea {
+  height:300px;
+}
