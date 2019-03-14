@@ -97,3 +97,39 @@ textarea {
 input, div.forumSel {
    background:gray;
 }
+
+/* Hamburger */
+
+div#hbdrop {
+    background-color: white;
+    border: 1px solid black;
+    border-top: white;
+    border-radius: 0 0 0.5em 0.5em;
+    display: none;
+    font-size: 80%;
+    left: 2em;
+    width: 90%;
+    padding-right: 1em;
+    position: absolute;
+    z-index: 20;  /* just below mainmenu, but above timeline bubbles */
+}
+
+.submenu {
+    font-size: .7em;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.submenu a, .submenu label {
+    padding: 10px 11px;
+    text-decoration:none;
+    color: #777;
+}
+
+.submenu a:hover, .submenu label:hover {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: #000;
+}
+
