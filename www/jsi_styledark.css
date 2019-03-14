@@ -101,7 +101,7 @@ input, div.forumSel {
 /* Hamburger */
 
 div#hbdrop {
-    background-color: white;
+    background-color: #333;
     border: 1px solid black;
     border-top: white;
     border-radius: 0 0 0.5em 0.5em;
@@ -133,3 +133,6 @@ div#hbdrop {
     color: #000;
 }
 
+#sitemap {
+    background:#333;
+}

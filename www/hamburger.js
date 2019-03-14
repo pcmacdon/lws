@@ -20,9 +20,10 @@
 (function() {
   var hbButton = document.getElementById("hbbtn");
   if (!hbButton) return;   // no hamburger button
+  var $home = hbButton.dataset.home;
   if (!document.addEventListener) {
     // Turn the button into a link to the sitemap for incompatible browsers.
-    hbButton.href = "$home/sitemap";
+    hbButton.href = $home+"/sitemap";
     return;
   }
   var panel = document.getElementById("hbdrop");
@@ -222,7 +223,7 @@
           }
           // else, can't parse response as HTML or XML
         }
-        xhr.open("GET", "$home/sitemap?popup");   // note the TH1 substitution!
+        xhr.open("GET", $home+"/sitemap?popup");   // note the TH1 substitution!
         xhr.responseType = "document";
         xhr.send();
       }
