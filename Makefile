@@ -4,10 +4,10 @@ LWSVER=2.2
 
 TARGET=unix
 LWSBASE=src
-CFLAGS  = -g -Wall -I$(SOURCEDIR)
+CFLAGS  = -g -Wall -I$(SOURCEDIR) -I../../miniz
 
 ifeq ($(MINIZ),1)
-CFLAGS += -I../miniz
+CFLAGS += -I../../miniz
 endif
 
 SOURCEDIR=$(LWSBASE)
@@ -81,7 +81,7 @@ lwsOne.c: $(SOURCEDIR)/liblws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 liblws: $(LWSLIBNAME)
 
 $(LWSLIBNAME): lwsOne.c
-	$(CC) -c -o $@ lwsOne.c $(CFLAGS) -Isrc/$(TARGET)
+	$(CC) -c -o $@ lwsOne.c $(CFLAGS) $(LWSFLAGS)
 
 
 clean:
