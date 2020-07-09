@@ -564,6 +564,7 @@ lws_create_vhost(struct lws_context *context,
 	return vh;
 
 bail:
+    lws_free(vh->same_vh_protocol_list);
 	lws_free(vh);
 
 	return NULL;
