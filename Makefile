@@ -1,14 +1,17 @@
 # Makefile to create lws.c and lwsOne.c
 # TODO: create miniz.c
-LWSVER=2.0202
+LWS_VER=2.0202
+LWS_SSL=0
+LWS_MINIZ=0   # 1=external provide, 2=internally provided
+LWS_CFLAGS=
 
 TARGET=unix
 LWSBASE=src
-CFLAGS=-g -Wall -I$(SOURCEDIR) $(LWSOPTS)
+CFLAGS=-g -Wall -I$(SOURCEDIR) $(LWS_CFLAGS)
 
 SOURCEDIR=$(LWSBASE)
 LWSINT=$(LWSBASE)
-LWSLIBNAME=liblws_$(TARGET)-$(LWSVER).a
+LWSLIBNAME=liblws_$(TARGET)-$(LWS_VER).a
 
 SOURCES = $(SOURCEDIR)/base64-decode.c $(SOURCEDIR)/handshake.c $(SOURCEDIR)/liblws.c \
 	$(SOURCEDIR)/service.c $(SOURCEDIR)/pollfd.c $(SOURCEDIR)/output.c $(SOURCEDIR)/parsers.c \
@@ -18,12 +21,21 @@ SOURCES = $(SOURCEDIR)/base64-decode.c $(SOURCEDIR)/handshake.c $(SOURCEDIR)/lib
 	$(SOURCEDIR)/extension.c $(SOURCEDIR)/extension-permessage-deflate.c $(SOURCEDIR)/ranges.c
 
 
-ifeq ($(LWSMINIZ),1)
-SOURCES += -Iminiz
+
+ifeq ($(LWS_MINIZ),1)
+CFLAGS += -Iminiz
+endif
+ifeq ($(LWS_MINIZ),2)
+CFLAGS += -DLWS_MINIZ=1
 endif
 
-ifeq ($(LWSSSL),1)
-SSLSOURCES += $(SOURCEDIR)/ssl.c $(SOURCEDIR)/ssl-client.c $(SOURCEDIR)/ssl-server.c $(SOURCEDIR)/ssl-http2.c
+SSLSOURCES += $(SOURCEDIR)/ssl.c $(SOURCEDIR)/ssl-client.c $(SOURCEDIR)/ssl-server.c
+#$(SOURCEDIR)/ssl-http2.c $(SOURCEDIR)/http2.c
+
+ifeq ($(LWS_SSL),1)
+CFLAGS += -DLWS_OPENSSL_SUPPORT=1 -DLWS_WITH_SSL=1 
+#-DLWS_USE_HTTP2=1
+CFLAGS += -I$(HOME)/usr/openssl/include
 endif
 
 
@@ -32,15 +44,6 @@ UFILES = $(SOURCEDIR)/lws-plat-unix.c
 
 ifeq ($(WIN),1)
 CFLAGS +=  -D__USE_MINGW_ANSI_STDIO -I$(SOURCEDIR)/../win32port/win32helpers
-endif
-
-LWSFLAGS = -DLWS_WITHOUT_TESTAPPS=1 -DWITH_SSL=0  \
-	-DLWS_WITH_SSL=0 -DLWS_WITH_ZLIB=0 -DLWS_WITHOUT_EXTENSIONS=1
-
-ifeq ($(WIN),1)
-LWSFLAGS += -DLWS_USE_BUNDLED_ZLIB=1 -DLWS_WITH_STATIC=1 -DLWS_WITH_SHARED=0
-else
-LWSFLAGS += -DLWS_USE_BUNDLED_ZLIB=0
 endif
 
 all: lws.c lwsOne.c liblws
@@ -52,10 +55,13 @@ lws.c: $(SOURCEDIR)/liblws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	echo "#define LWS_IN_AMALGAMATION" >> $@
 	echo "#define _GNU_SOURCE"  >> $@
 	echo "#define LWS_AMALGAMATION" >> $@
-	echo "#if LWS__MINIZ==1" >> $@
+	echo "#if LWS_MINIZ==1" >> $@
 	cat miniz/miniz.c >> $@
-	echo "#endif //LWS__MINIZ==1 " >> $@
-	cat $(SOURCES) $(SSLSOURCES) | grep -v '^#line' >> $@
+	echo "#endif //LWS_MINIZ==1 " >> $@
+	cat $(SOURCES) | grep -v '^#line' >> $@
+	echo "#if LWS_WITH_SSL==1" >> $@
+	cat $(SSLSOURCES) | grep -v '^#line' >> $@
+	echo "#endif //LWS_WITH_SSL==1 " >> $@
 	echo "#ifndef WIN32" >> $@
 	cat $(WFILES)  >> $@
 	echo "#else // WIN32" >> $@
@@ -67,10 +73,13 @@ lws.c: $(SOURCEDIR)/liblws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 lwsOne.c: $(SOURCEDIR)/liblws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	echo '#include "$(SOURCEDIR)/liblws.h"' > $@
 	echo "#define LWS_AMALGAMATION" >> $@
-	echo "#if LWS__MINIZ==1" >> $@
+	echo "#if LWS_MINIZ==1" >> $@
 	echo '#include "'miniz/miniz.c'"' >> $@
-	echo "#endif //LWS__MINIZ==1" >> $@
-	for ii in  $(SOURCES) $(SSLSOURCES) $(PCFILES); do echo '#include "'$$ii'"' >> $@; done
+	echo "#endif //LWS_MINIZ==1" >> $@
+	for ii in  $(SOURCES); do echo '#include "'$$ii'"' >> $@; done
+	echo "#if LWS_WITH_SSL==1" >> $@
+	for ii in  $(SSLSOURCES); do echo '#include "'$$ii'"' >> $@; done
+	echo "#endif //LWS_WITH_SSL==1" >> $@
 	echo "#ifdef WIN32" >> $@
 	for ii in $(WFILES); do echo '#include "'$$ii'"' >> $@; done
 	echo "#else // WIN32" >> $@
@@ -81,7 +90,7 @@ lwsOne.c: $(SOURCEDIR)/liblws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 liblws: $(LWSLIBNAME)
 
 $(LWSLIBNAME): lwsOne.c
-	$(CC) -c -o $@ lwsOne.c $(CFLAGS) $(LWSFLAGS)
+	$(CC) -c -o $@ lwsOne.c $(CFLAGS)
 
 
 clean:
