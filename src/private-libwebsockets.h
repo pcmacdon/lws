@@ -291,7 +291,8 @@ static inline int compatible_close(int fd) { return close(fd); }
 #endif
 
 #if defined(WIN32) || defined(_WIN32)
-#include <gettimeofday.h>
+//#include <gettimeofday.h>
+int gettimeofday(struct timeval *tv, void *unused);
 #endif
 
 #if defined(LWS_WITH_ESP8266)
