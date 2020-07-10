@@ -3374,7 +3374,7 @@ lws_set_timeout(struct lws *wsi, enum pending_timeout reason, int secs);
 #define LWS_SIZEOFPTR (sizeof (void *))
 #endif
 #if !defined(u_int64_t)
-#define u_int64_t unsigned long long
+//#define u_int64_t unsigned long long
 #endif
 
 #if defined(__x86_64__)
