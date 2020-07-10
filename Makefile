@@ -1,6 +1,6 @@
 # Makefile to create lws.c and lwsOne.c
 # TODO: create miniz.c
-LWSVER=2.2
+LWSVER=2.0202
 
 TARGET=unix
 LWSBASE=src
@@ -8,7 +8,7 @@ CFLAGS=-g -Wall -I$(SOURCEDIR) $(LWSOPTS)
 
 SOURCEDIR=$(LWSBASE)
 LWSINT=$(LWSBASE)
-LWSLIBNAME=liblws_$(TARGET).a
+LWSLIBNAME=liblws_$(TARGET)-$(LWSVER).a
 
 SOURCES = $(SOURCEDIR)/base64-decode.c $(SOURCEDIR)/handshake.c $(SOURCEDIR)/liblws.c \
 	$(SOURCEDIR)/service.c $(SOURCEDIR)/pollfd.c $(SOURCEDIR)/output.c $(SOURCEDIR)/parsers.c \
@@ -44,9 +44,6 @@ LWSFLAGS += -DLWS_USE_BUNDLED_ZLIB=0
 endif
 
 all: lws.c lwsOne.c liblws
-
-checkver:
-	rm -f src && ln -sf liblws-$(LWSVER) src
 
 # Create the single amalgamation file lws.c
 lws.c: $(SOURCEDIR)/liblws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
