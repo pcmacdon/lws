@@ -6,19 +6,6 @@
 	#endif
 #endif
 
-#define LWS_INSTALL_DATADIR "/usr/local/share"
-
-/* Define to 1 to use wolfSSL/CyaSSL as a replacement for OpenSSL.
- * LWS_OPENSSL_SUPPORT needs to be set also for this to work. */
-/* #undef USE_WOLFSSL */
-
-/* Also define to 1 (in addition to USE_WOLFSSL) when using the
-  (older) CyaSSL library */
-/* #undef USE_OLD_CYASSL */
-/* #undef LWS_USE_BORINGSSL */
-
-/* #undef LWS_USE_MBEDTLS */
-/* #undef LWS_USE_POLARSSL */
 /* #undef LWS_WITH_ESP8266 */
 /* #undef LWS_WITH_ESP32 */
 
@@ -59,13 +46,10 @@
 /* #undef LWS_USE_LIBEVENT */
 
 /* Build with support for ipv6 */
-/* #undef LWS_USE_IPV6 */
+#define LWS_USE_IPV6 1
 
 /* Build with support for UNIX domain socket */
-/* #undef LWS_USE_UNIX_SOCK */
-
-/* Build with support for HTTP2 */
-/* #undef LWS_USE_HTTP2 */
+#define LWS_USE_UNIX_SOCK 1
 
 /* Turn on latency measuring code */
 /* #undef LWS_LATENCY */
@@ -79,18 +63,11 @@
 /* Build without client support */
 /* #undef LWS_NO_CLIENT */
 
-/* If we should compile with MinGW support */
-/* #undef LWS_MINGW_SUPPORT */
-
-/* Use the BSD getifaddrs that comes with libwebsocket, for uclibc support */
-/* #undef LWS_BUILTIN_GETIFADDRS */
-
 /* use SHA1() not internal libwebsockets_SHA1 */
 /* #undef LWS_SHA1_USE_OPENSSL_NAME */
 
 /* SSL server using ECDH certificate */
 /* #undef LWS_SSL_SERVER_WITH_ECDH_CERT */
-/* #undef LWS_HAVE_SSL_CTX_set1_param */
 /* #undef LWS_HAVE_X509_VERIFY_PARAM_set1_host */
 
 /* #undef LWS_HAVE_UV_VERSION_H */
@@ -111,16 +88,8 @@
 /* #undef LWS_WITH_ACCESS_LOG */
 #define LWS_WITH_SERVER_STATUS 1
 
-/* #undef LWS_WITH_STATEFUL_URLDECODE */
-
 /* Maximum supported service threads */
 #define LWS_MAX_SMP 1
-
-/* Lightweight JSON Parser */
-/* #undef LWS_WITH_LEJP */
-
-/* SMTP */
-/* #undef LWS_WITH_SMTP */
 
 /* OPTEE */
 /* #undef LWS_PLAT_OPTEE */
@@ -128,8 +97,6 @@
 /* ZIP FOPS */
 /* #undef LWS_WITH_ZIP_FOPS */
 #define LWS_HAVE_STDINT_H
-
-/* #undef LWS_AVOID_SIGPIPE_IGN */
 
 /* #undef LWS_FALLBACK_GETHOSTBYNAME */
 

@@ -253,16 +253,6 @@ lws_plat_get_peer_simple(struct lws *wsi, char *name, int namelen);
 
 #ifdef LWS_OPENSSL_SUPPORT
 
-#ifdef USE_WOLFSSL
-#ifdef USE_OLD_CYASSL
-#include <cyassl/openssl/ssl.h>
-#include <cyassl/error-ssl.h>
-#else
-#include <wolfssl/openssl/ssl.h>
-#include <wolfssl/error-ssl.h>
-#define OPENSSL_NO_TLSEXT
-#endif /* not USE_OLD_CYASSL */
-#else
 #include <openssl/ssl.h>
 #if !defined(LWS_WITH_ESP32)
 #include <openssl/evp.h>
@@ -281,7 +271,6 @@ lws_plat_get_peer_simple(struct lws *wsi, char *name, int namelen);
  */
 #define OPENSSL_NO_TLSEXT
 #endif
-#endif /* not USE_WOLFSSL */
 #endif
 
 #include "lws.h"

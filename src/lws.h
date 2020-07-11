@@ -171,20 +171,10 @@ struct sockaddr_in;
 
 #ifdef LWS_OPENSSL_SUPPORT
 
-#ifdef USE_WOLFSSL
-#ifdef USE_OLD_CYASSL
-#include <cyassl/openssl/ssl.h>
-#include <cyassl/error-ssl.h>
-#else
-#include <wolfssl/openssl/ssl.h>
-#include <wolfssl/error-ssl.h>
-#endif /* not USE_OLD_CYASSL */
-#else
 #include <openssl/ssl.h>
 #if !defined(LWS_WITH_ESP32)
 #include <openssl/err.h>
 #endif
-#endif /* not USE_WOLFSSL */
 #endif
 
 
@@ -1988,48 +1978,6 @@ struct lws_vhost;
 LWS_EXTERN LWS_VISIBLE struct lws_vhost *
 lws_create_vhost(struct lws_context *context,
 		 struct lws_context_creation_info *info);
-
-/**
- * lwsws_get_config_globals() - Parse a JSON server config file
- * \param info:		pointer to struct with parameters
- * \param d:		filepath of the config file
- * \param config_strings: storage for the config strings extracted from JSON,
- * 			  the pointer is incremented as strings are stored
- * \param len:		pointer to the remaining length left in config_strings
- *			  the value is decremented as strings are stored
- *
- * This function prepares a n lws_context_creation_info struct with global
- * settings from a file d.
- *
- * Requires CMake option LWS_WITH_LEJP_CONF to have been enabled
- */
-LWS_VISIBLE LWS_EXTERN int
-lwsws_get_config_globals(struct lws_context_creation_info *info, const char *d,
-			 char **config_strings, int *len);
-
-/**
- * lwsws_get_config_vhosts() - Create vhosts from a JSON server config file
- * \param context:	pointer to result of lws_create_context()
- * \param info:		pointer to struct with parameters
- * \param d:		filepath of the config file
- * \param config_strings: storage for the config strings extracted from JSON,
- * 			  the pointer is incremented as strings are stored
- * \param len:		pointer to the remaining length left in config_strings
- *			  the value is decremented as strings are stored
- *
- * This function creates vhosts into a context according to the settings in
- *JSON files found in directory d.
- *
- * Requires CMake option LWS_WITH_LEJP_CONF to have been enabled
- */
-LWS_VISIBLE LWS_EXTERN int
-lwsws_get_config_vhosts(struct lws_context *context,
-			struct lws_context_creation_info *info, const char *d,
-			char **config_strings, int *len);
-
-/** lws_vhost_get() - \deprecated deprecated: use lws_get_vhost() */
-LWS_VISIBLE LWS_EXTERN struct lws_vhost *
-lws_vhost_get(struct lws *wsi) LWS_WARN_DEPRECATED;
 
 /**
  * lws_get_vhost() - return the vhost a wsi belongs to
@@ -4563,130 +4511,6 @@ LWS_VISIBLE LWS_EXTERN int
 _lws_plat_file_write(lws_fop_fd_t fop_fd, lws_filepos_t *amount,
 		     uint8_t *buf, lws_filepos_t len);
 
-//@}
-
-/** \defgroup smtp
- * \ingroup lwsapi
- * ##SMTP related functions
- *
- * These apis let you communicate with a local SMTP server to send email from
- * lws.  It handles all the SMTP sequencing and protocol actions.
- *
- * Your system should have postfix, sendmail or another MTA listening on port
- * 25 and able to send email using the "mail" commandline app.  Usually distro
- * MTAs are configured for this by default.
- *
- * It runs via its own libuv events if initialized (which requires giving it
- * a libuv loop to attach to).
- *
- * It operates using three callbacks, on_next() queries if there is a new email
- * to send, on_get_body() asks for the body of the email, and on_sent() is
- * called after the email is successfully sent.
- *
- * To use it
- *
- *  - create an lws_email struct
- *
- *  - initialize data, loop, the email_* strings, max_content_size and
- *    the callbacks
- *
- *  - call lws_email_init()
- *
- *  When you have at least one email to send, call lws_email_check() to
- *  schedule starting to send it.
- */
-//@{
-#ifdef LWS_WITH_SMTP
-
-/** enum lwsgs_smtp_states - where we are in SMTP protocol sequence */
-enum lwsgs_smtp_states {
-	LGSSMTP_IDLE, /**< awaiting new email */
-	LGSSMTP_CONNECTING, /**< opening tcp connection to MTA */
-	LGSSMTP_CONNECTED, /**< tcp connection to MTA is connected */
-	LGSSMTP_SENT_HELO, /**< sent the HELO */
-	LGSSMTP_SENT_FROM, /**< sent FROM */
-	LGSSMTP_SENT_TO, /**< sent TO */
-	LGSSMTP_SENT_DATA, /**< sent DATA request */
-	LGSSMTP_SENT_BODY, /**< sent the email body */
-	LGSSMTP_SENT_QUIT, /**< sent the session quit */
-};
-
-/** struct lws_email - abstract context for performing SMTP operations */
-struct lws_email {
-	void *data;
-	/**< opaque pointer set by user code and available to the callbacks */
-	uv_loop_t *loop;
-	/**< the libuv loop we will work on */
-
-	char email_smtp_ip[32]; /**< Fill before init, eg, "127.0.0.1" */
-	char email_helo[32];	/**< Fill before init, eg, "myserver.com" */
-	char email_from[100];	/**< Fill before init or on_next */
-	char email_to[100];	/**< Fill before init or on_next */
-
-	unsigned int max_content_size;
-	/**< largest possible email body size */
-
-	/* Fill all the callbacks before init */
-
-	int (*on_next)(struct lws_email *email);
-	/**< (Fill in before calling lws_email_init)
-	 * called when idle, 0 = another email to send, nonzero is idle.
-	 * If you return 0, all of the email_* char arrays must be set
-	 * to something useful. */
-	int (*on_sent)(struct lws_email *email);
-	/**< (Fill in before calling lws_email_init)
-	 * called when transfer of the email to the SMTP server was
-	 * successful, your callback would remove the current email
-	 * from its queue */
-	int (*on_get_body)(struct lws_email *email, char *buf, int len);
-	/**< (Fill in before calling lws_email_init)
-	 * called when the body part of the queued email is about to be
-	 * sent to the SMTP server. */
-
-
-	/* private things */
-	uv_timer_t timeout_email; /**< private */
-	enum lwsgs_smtp_states estate; /**< private */
-	uv_connect_t email_connect_req; /**< private */
-	uv_tcp_t email_client; /**< private */
-	time_t email_connect_started; /**< private */
-	char email_buf[256]; /**< private */
-	char *content; /**< private */
-};
-
-/**
- * lws_email_init() - Initialize a struct lws_email
- *
- * \param email: struct lws_email to init
- * \param loop: libuv loop to use
- * \param max_content: max email content size
- *
- * Prepares a struct lws_email for use ending SMTP
- */
-LWS_VISIBLE LWS_EXTERN int
-lws_email_init(struct lws_email *email, uv_loop_t *loop, int max_content);
-
-/**
- * lws_email_check() - Request check for new email
- *
- * \param email: struct lws_email context to check
- *
- * Schedules a check for new emails in 1s... call this when you have queued an
- * email for send.
- */
-LWS_VISIBLE LWS_EXTERN void
-lws_email_check(struct lws_email *email);
-/**
- * lws_email_destroy() - stop using the struct lws_email
- *
- * \param email: the struct lws_email context
- *
- * Stop sending email using email and free allocations
- */
-LWS_VISIBLE LWS_EXTERN void
-lws_email_destroy(struct lws_email *email);
-
-#endif
 //@}
 
 #ifdef __cplusplus
