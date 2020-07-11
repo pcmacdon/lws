@@ -7,18 +7,18 @@ LWS_CFLAGS=
 
 TARGET=unix
 LWSBASE=src
-CFLAGS=-g -Wall -I$(SOURCEDIR) $(LWS_CFLAGS)
+CFLAGS=-g -Wall -I$(SD) $(LWS_CFLAGS)
 
-SOURCEDIR=$(LWSBASE)
+SD=$(LWSBASE)
 LWSINT=$(LWSBASE)
 LWSLIBNAME=liblws_$(TARGET)-$(LWS_VER).a
 
-SOURCES = $(SOURCEDIR)/base64-decode.c $(SOURCEDIR)/handshake.c $(SOURCEDIR)/lws.c \
-	$(SOURCEDIR)/service.c $(SOURCEDIR)/pollfd.c $(SOURCEDIR)/output.c $(SOURCEDIR)/parsers.c \
-	$(SOURCEDIR)/context.c $(SOURCEDIR)/alloc.c $(SOURCEDIR)/header.c $(SOURCEDIR)/client.c \
-	$(SOURCEDIR)/client-handshake.c $(SOURCEDIR)/client-parser.c $(SOURCEDIR)/sha-1.c \
-	$(SOURCEDIR)/server.c $(SOURCEDIR)/server-handshake.c \
-	$(SOURCEDIR)/extension.c $(SOURCEDIR)/extension-permessage-deflate.c $(SOURCEDIR)/ranges.c
+SOURCES = $(SD)/base64-decode.c $(SD)/handshake.c $(SD)/lws.c \
+	$(SD)/service.c $(SD)/pollfd.c $(SD)/output.c $(SD)/parsers.c \
+	$(SD)/context.c $(SD)/alloc.c $(SD)/header.c $(SD)/client.c \
+	$(SD)/client-handshake.c $(SD)/client-parser.c $(SD)/sha-1.c \
+	$(SD)/server.c $(SD)/server-handshake.c \
+	$(SD)/extension.c $(SD)/extension-permessage-deflate.c $(SD)/ranges.c
 
 
 
@@ -29,8 +29,8 @@ ifeq ($(LWS_MINIZ),2)
 CFLAGS += -DLWS_MINIZ=1
 endif
 
-SSLSOURCES += $(SOURCEDIR)/ssl.c $(SOURCEDIR)/ssl-client.c $(SOURCEDIR)/ssl-server.c
-#$(SOURCEDIR)/ssl-http2.c $(SOURCEDIR)/http2.c
+SSLSOURCES += $(SD)/ssl.c $(SD)/ssl-client.c $(SD)/ssl-server.c
+#$(SD)/ssl-http2.c $(SD)/http2.c
 
 ifeq ($(LWS_SSL),1)
 CFLAGS += -DLWS_OPENSSL_SUPPORT=1 -DLWS_WITH_SSL=1 
@@ -39,18 +39,18 @@ CFLAGS += -I$(HOME)/usr/openssl/include
 endif
 
 
-WFILES = $(SOURCEDIR)/lws-plat-win.c 
-UFILES = $(SOURCEDIR)/lws-plat-unix.c 
+WFILES = $(SD)/lws-plat-win.c 
+UFILES = $(SD)/lws-plat-unix.c 
 
 ifeq ($(WIN),1)
-CFLAGS +=  -D__USE_MINGW_ANSI_STDIO -I$(SOURCEDIR)/../win32port/win32helpers
+CFLAGS +=  -D__USE_MINGW_ANSI_STDIO -I$(SD)/../win32port/win32helpers
 endif
 
 all: lws.c lwsOne.c liblws
 
 # Create the single amalgamation file lws.c
-lws.c: $(SOURCEDIR)/lws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
-	cat $(SOURCEDIR)/lws.h > $@
+lws.c: $(SD)/lws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
+	cat $(SD)/lws.h > $@
 	echo "#ifndef LWS_IN_AMALGAMATION" >> $@
 	echo "#define LWS_IN_AMALGAMATION" >> $@
 	echo "#define _GNU_SOURCE"  >> $@
@@ -70,8 +70,8 @@ lws.c: $(SOURCEDIR)/lws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	echo "#endif //LWS_IN_AMALGAMATION" >> $@
 
 # Create the single compile file lwsOne.c
-lwsOne.c: $(SOURCEDIR)/lws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
-	echo '#include "$(SOURCEDIR)/lws.h"' > $@
+lwsOne.c: $(SD)/lws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
+	echo '#include "$(SD)/lws.h"' > $@
 	echo "#define LWS_AMALGAMATION" >> $@
 	echo "#if LWS_MINIZ==1" >> $@
 	echo '#include "'miniz/miniz.c'"' >> $@
