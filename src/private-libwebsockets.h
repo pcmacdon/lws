@@ -284,7 +284,7 @@ lws_plat_get_peer_simple(struct lws *wsi, char *name, int namelen);
 #endif /* not USE_WOLFSSL */
 #endif
 
-#include "liblws.h"
+#include "lws.h"
 #if defined(WIN32) || defined(_WIN32)
 #else
 static inline int compatible_close(int fd) { return close(fd); }

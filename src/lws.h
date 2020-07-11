@@ -832,7 +832,7 @@ enum lws_callback_reasons {
 	 * In your handler you can use the public APIs
 	 * lws_hdr_total_length() / lws_hdr_copy() to access all of the
 	 * headers using the header enums lws_token_indexes from
-	 * liblws.h to check for and read the supported header
+	 * lws.h to check for and read the supported header
 	 * presence and content before deciding to allow the http
 	 * connection to proceed or to kill the connection. */
 	LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED		= 19,
@@ -852,7 +852,7 @@ enum lws_callback_reasons {
 	 * In your handler you can use the public APIs
 	 * lws_hdr_total_length() / lws_hdr_copy() to access all of the
 	 * headers using the header enums lws_token_indexes from
-	 * liblws.h to check for and read the supported header
+	 * lws.h to check for and read the supported header
 	 * presence and content before deciding to allow the handshake
 	 * to proceed or to kill the connection. */
 	LWS_CALLBACK_OPENSSL_LOAD_EXTRA_CLIENT_VERIFY_CERTS	= 21,

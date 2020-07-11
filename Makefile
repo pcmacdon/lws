@@ -13,7 +13,7 @@ SOURCEDIR=$(LWSBASE)
 LWSINT=$(LWSBASE)
 LWSLIBNAME=liblws_$(TARGET)-$(LWS_VER).a
 
-SOURCES = $(SOURCEDIR)/base64-decode.c $(SOURCEDIR)/handshake.c $(SOURCEDIR)/liblws.c \
+SOURCES = $(SOURCEDIR)/base64-decode.c $(SOURCEDIR)/handshake.c $(SOURCEDIR)/lws.c \
 	$(SOURCEDIR)/service.c $(SOURCEDIR)/pollfd.c $(SOURCEDIR)/output.c $(SOURCEDIR)/parsers.c \
 	$(SOURCEDIR)/context.c $(SOURCEDIR)/alloc.c $(SOURCEDIR)/header.c $(SOURCEDIR)/client.c \
 	$(SOURCEDIR)/client-handshake.c $(SOURCEDIR)/client-parser.c $(SOURCEDIR)/sha-1.c \
@@ -49,8 +49,8 @@ endif
 all: lws.c lwsOne.c liblws
 
 # Create the single amalgamation file lws.c
-lws.c: $(SOURCEDIR)/liblws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
-	cat $(SOURCEDIR)/liblws.h > $@
+lws.c: $(SOURCEDIR)/lws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
+	cat $(SOURCEDIR)/lws.h > $@
 	echo "#ifndef LWS_IN_AMALGAMATION" >> $@
 	echo "#define LWS_IN_AMALGAMATION" >> $@
 	echo "#define _GNU_SOURCE"  >> $@
@@ -70,8 +70,8 @@ lws.c: $(SOURCEDIR)/liblws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	echo "#endif //LWS_IN_AMALGAMATION" >> $@
 
 # Create the single compile file lwsOne.c
-lwsOne.c: $(SOURCEDIR)/liblws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
-	echo '#include "$(SOURCEDIR)/liblws.h"' > $@
+lwsOne.c: $(SOURCEDIR)/lws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
+	echo '#include "$(SOURCEDIR)/lws.h"' > $@
 	echo "#define LWS_AMALGAMATION" >> $@
 	echo "#if LWS_MINIZ==1" >> $@
 	echo '#include "'miniz/miniz.c'"' >> $@
