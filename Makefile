@@ -1,4 +1,4 @@
-# Makefile to create lws.c and lwsOne.c
+# Makefile to create lwsOne.c and liblws.a
 # TODO: create miniz.c
 LWS_VER=2.0202
 LWS_SSL=0
@@ -11,7 +11,7 @@ CFLAGS=-g -Wall -I$(SD) $(LWS_CFLAGS)
 
 SD=$(LWSBASE)
 LWSINT=$(LWSBASE)
-LWSLIBNAME=liblws_$(TARGET)-$(LWS_VER).a
+LWS_LIBNAME=liblws.a
 
 SOURCES = $(SD)/base64-decode.c $(SD)/handshake.c $(SD)/lws.c \
 	$(SD)/service.c $(SD)/pollfd.c $(SD)/output.c $(SD)/parsers.c \
@@ -46,10 +46,10 @@ ifeq ($(WIN),1)
 CFLAGS +=  -D__USE_MINGW_ANSI_STDIO -I$(SD)/../win32port/win32helpers
 endif
 
-all: lws.c lwsOne.c liblws
+all: lwsOne.c liblws
 
-# Create the single amalgamation file lws.c
-lws.c: $(SD)/lws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
+# Create the single amalgamation file lwsSingle.c
+lwsSingle.c: $(SD)/lws.h $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	cat $(SD)/lws.h > $@
 	echo "#ifndef LWS_IN_AMALGAMATION" >> $@
 	echo "#define LWS_IN_AMALGAMATION" >> $@
@@ -87,15 +87,16 @@ lwsOne.c: $(SD)/lws.h   $(SOURCES) $(SSLSOURCES) $(MAKEFILE)
 	echo "#endif //WIN32" >> $@
 
 
-liblws: $(LWSLIBNAME)
+liblws: $(LWS_LIBNAME)
 
-$(LWSLIBNAME): lwsOne.c
+$(LWS_LIBNAME): lwsOne.c
 	$(CC) -c -o $@ lwsOne.c $(CFLAGS)
 
 
 clean:
-	rm -f liblws_*.a
+	rm -f liblws*.a
 
 cleanall: clean
+	rm -f lwsOne.c lwsSingle.c
 	
 .PHONY: all depend remake clean cleanall

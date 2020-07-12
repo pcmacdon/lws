@@ -29,9 +29,6 @@ lws_ssl_bind_passphrase(SSL_CTX *ssl_ctx, struct lws_context_creation_info *info
 
 extern int lws_ssl_get_error(struct lws *wsi, int n);
 
-#ifdef USE_WOLFSSL
-#else
-
 static int
 OpenSSL_client_verify_callback(int preverify_ok, X509_STORE_CTX *x509_ctx)
 {
@@ -88,7 +85,6 @@ OpenSSL_client_verify_callback(int preverify_ok, X509_STORE_CTX *x509_ctx)
 	/* convert callback return code from 0 = OK to verify callback return value 1 = OK */
 	return !n;
 }
-#endif
 
 int
 lws_ssl_client_bio_create(struct lws *wsi)
@@ -137,65 +133,21 @@ lws_ssl_client_bio_create(struct lws *wsi)
 
 #endif
 
-#ifndef USE_WOLFSSL
-#ifndef USE_OLD_CYASSL
 	/* OpenSSL_client_verify_callback will be called @ SSL_connect() */
 	SSL_set_verify(wsi->ssl, SSL_VERIFY_PEER, OpenSSL_client_verify_callback);
-#endif
-#endif
-
-#ifndef USE_WOLFSSL
 	SSL_set_mode(wsi->ssl,  SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
-#endif
 	/*
 	 * use server name indication (SNI), if supported,
 	 * when establishing connection
 	 */
-#ifdef USE_WOLFSSL
-#ifdef USE_OLD_CYASSL
-#ifdef CYASSL_SNI_HOST_NAME
-	CyaSSL_UseSNI(wsi->ssl, CYASSL_SNI_HOST_NAME, hostname, strlen(hostname));
-#endif
-#else
-#ifdef WOLFSSL_SNI_HOST_NAME
-	wolfSSL_UseSNI(wsi->ssl, WOLFSSL_SNI_HOST_NAME, hostname, strlen(hostname));
-#endif
-#endif
-#else
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
 	SSL_set_tlsext_host_name(wsi->ssl, hostname);
 #endif
-#endif
-
-#ifdef USE_WOLFSSL
-	/*
-	 * wolfSSL/CyaSSL does certificate verification differently
-	 * from OpenSSL.
-	 * If we should ignore the certificate, we need to set
-	 * this before SSL_new and SSL_connect is called.
-	 * Otherwise the connect will simply fail with error code -155
-	 */
-#ifdef USE_OLD_CYASSL
-	if (wsi->use_ssl == 2)
-		CyaSSL_set_verify(wsi->ssl, SSL_VERIFY_NONE, NULL);
-#else
-	if (wsi->use_ssl == 2)
-		wolfSSL_set_verify(wsi->ssl, SSL_VERIFY_NONE, NULL);
-#endif
-#endif /* USE_WOLFSSL */
 
 	wsi->client_bio = BIO_new_socket(wsi->desc.sockfd, BIO_NOCLOSE);
 	SSL_set_bio(wsi->ssl, wsi->client_bio, wsi->client_bio);
 
-#ifdef USE_WOLFSSL
-#ifdef USE_OLD_CYASSL
-	CyaSSL_set_using_nonblock(wsi->ssl, 1);
-#else
-	wolfSSL_set_using_nonblock(wsi->ssl, 1);
-#endif
-#else
 	BIO_set_nbio(wsi->client_bio, 1); /* nonblocking */
-#endif
 
 	SSL_set_ex_data(wsi->ssl, openssl_websocket_private_data_index,
 			wsi);
@@ -342,38 +294,6 @@ lws_ssl_client_connect2(struct lws *wsi)
 			}
 		}
 	}
-
-#ifndef USE_WOLFSSL
-	/*
-	 * See comment above about wolfSSL certificate
-	 * verification
-	 */
-	lws_latency_pre(context, wsi);
-	n = SSL_get_verify_result(wsi->ssl);
-	lws_latency(context, wsi,
-		"SSL_get_verify_result LWS_CONNMODE..HANDSHAKE", n, n > 0);
-
-	if (n != X509_V_OK) {
-		if ((n == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT ||
-		     n == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN) &&
-		     (wsi->use_ssl & LCCSCF_ALLOW_SELFSIGNED)) {
-			lwsl_notice("accepting self-signed certificate\n");
-		} else if ((n == X509_V_ERR_CERT_NOT_YET_VALID ||
-		            n == X509_V_ERR_CERT_HAS_EXPIRED) &&
-		     (wsi->use_ssl & LCCSCF_ALLOW_EXPIRED)) {
-			lwsl_notice("accepting expired certificate\n");
-		} else if (n == X509_V_ERR_CERT_NOT_YET_VALID) {
-			lwsl_notice("Cert is from the future... "
-				    "probably our clock... accepting...\n");
-		} else {
-			lwsl_err("server's cert didn't look good, X509_V_ERR = %d: %s\n",
-				 n, ERR_error_string(n, sb));
-			lws_ssl_elaborate_error();
-			return -1;
-		}
-	}
-
-#endif /* USE_WOLFSSL */
 
 	return 1;
 }

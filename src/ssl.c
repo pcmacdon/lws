@@ -160,7 +160,7 @@ lws_ssl_destroy(struct lws_vhost *vhost)
 // after 1.1.0 no need
 #if (OPENSSL_VERSION_NUMBER <  0x10100000)
 // <= 1.0.1f = old api, 1.0.1g+ = new api
-#if (OPENSSL_VERSION_NUMBER <= 0x1000106f) || defined(USE_WOLFSSL)
+#if (OPENSSL_VERSION_NUMBER <= 0x1000106f)
 	ERR_remove_state(0);
 #else
 #if OPENSSL_VERSION_NUMBER >= 0x1010005f && \
@@ -379,10 +379,8 @@ lws_server_socket_service_ssl(struct lws *wsi, lws_sockfd_type accept_fd)
 	struct lws_context *context = wsi->context;
 	struct lws_context_per_thread *pt = &context->pt[(int)wsi->tsi];
 	int n, m;
-#if !defined(USE_WOLFSSL)
 	BIO *bio;
-#endif
-        char buf[256];
+    char buf[256];
 
 	if (!LWS_SSL_ENABLED(wsi->vhost))
 		return 0;
@@ -409,14 +407,6 @@ lws_server_socket_service_ssl(struct lws *wsi, lws_sockfd_type accept_fd)
 			openssl_websocket_private_data_index, wsi);
 
 		SSL_set_fd(wsi->ssl, accept_fd);
-
-#ifdef USE_WOLFSSL
-#ifdef USE_OLD_CYASSL
-		CyaSSL_set_using_nonblock(wsi->ssl, 1);
-#else
-		wolfSSL_set_using_nonblock(wsi->ssl, 1);
-#endif
-#else
 		SSL_set_mode(wsi->ssl, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 		bio = SSL_get_rbio(wsi->ssl);
 		if (bio)
@@ -428,7 +418,6 @@ lws_server_socket_service_ssl(struct lws *wsi, lws_sockfd_type accept_fd)
 			BIO_set_nbio(bio, 1); /* nonblocking */
 		else
 			lwsl_notice("NULL rbio\n");
-#endif
 
 		/*
 		 * we are not accepted yet, but we need to enter ourselves
@@ -586,7 +575,7 @@ lws_ssl_context_destroy(struct lws_context *context)
 // after 1.1.0 no need
 #if (OPENSSL_VERSION_NUMBER <  0x10100000)
 // <= 1.0.1f = old api, 1.0.1g+ = new api
-#if (OPENSSL_VERSION_NUMBER <= 0x1000106f) || defined(USE_WOLFSSL)
+#if (OPENSSL_VERSION_NUMBER <= 0x1000106f)
 	ERR_remove_state(0);
 #else
 #if OPENSSL_VERSION_NUMBER >= 0x1010005f && \
