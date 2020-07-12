@@ -1,9 +1,9 @@
 /* lws_config.h  Generated from lws_config.h.in  */
 
 #ifndef NDEBUG
-	#ifndef _DEBUG
-		#define _DEBUG
-	#endif
+    #ifndef _DEBUG
+        #define _DEBUG
+    #endif
 #endif
 
 /* #undef LWS_WITH_ESP8266 */
@@ -45,11 +45,13 @@
 /* Enable libevent io loop */
 /* #undef LWS_USE_LIBEVENT */
 
+#ifndef __WIN32
 /* Build with support for ipv6 */
 #define LWS_USE_IPV6 1
 
 /* Build with support for UNIX domain socket */
 #define LWS_USE_UNIX_SOCK 1
+#endif
 
 /* Turn on latency measuring code */
 /* #undef LWS_LATENCY */

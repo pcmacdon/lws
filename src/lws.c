@@ -32,7 +32,7 @@
 
 #ifdef LWS_USE_IPV6
 #if defined(WIN32) || defined(_WIN32)
-#include <Iphlpapi.h>
+#include <iphlpapi.h>
 #else
 #include <net/if.h>
 #endif
